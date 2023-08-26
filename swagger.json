@@ -1,0 +1,41 @@
+{
+  "/users": {
+    "get": {
+      "tags": ["users"],
+      "summary": "Get all users",
+      "description": "Returns a list of all users",
+      "responses": {
+        "200": {
+          "description": "OK",
+          "schema": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      }
+    },
+    "post": {
+      "tags": ["users"],
+      "summary": "Create a new user",
+      "description": "Creates a new user and returns the created user",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "description": "User object that needs to be added",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      ],
+      "responses": {
+        "201": {
+          "description": "Created",
+          "schema": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      }
+    }
+  }
+}
