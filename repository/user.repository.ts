@@ -42,10 +42,9 @@ export class UserRepository {
   }
 
   async findUserPosts(id: string) {
-    const result = await this.pool.query(
-      "SELECT * FROM posts WHERE user_id = $1",
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM find_user_posts($1)", [
+      id,
+    ]);
     return result.rows;
   }
 

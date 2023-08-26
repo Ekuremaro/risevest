@@ -1,7 +1,12 @@
 import express from "express";
 import { UserRepository } from "./repository/user.repository";
+import { CommentRepository } from "./repository/comment.repostiory";
 import { UserService } from "./service/user.service";
 import { UserController } from "./controller/users.controller";
+import { PostController } from "./controller/posts.controller";
+import { PostRepository } from "./repository/post.respository";
+import { PostService } from "./service/post.service";
+import { MiddleWare } from "./controller/middlewares/middleware";
 import { Pool } from "pg";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -17,9 +22,14 @@ const pool = new Pool({
 });
 
 const userRepository = new UserRepository(pool);
+const postRepository = new PostRepository(pool);
+const commentRepository = new CommentRepository(pool);
+const postService = new PostService(postRepository, commentRepository);
 const userService = new UserService(userRepository);
 const authService = new AuthService(userRepository);
+const middleWare = new MiddleWare();
 const userController = new UserController(userService, authService);
+const postController = new PostController(postService);
 
 const app = express();
 
@@ -42,7 +52,9 @@ const options = {
 const specs = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-app.route("/users").get(userController.getUsers.bind(userController));
+app
+  .route("/users")
+  .get(middleWare.authMiddleware, userController.getUsers.bind(userController));
 
 app
   .route("/users/register")
@@ -58,13 +70,33 @@ app
 
 app
   .route("/users/:id/posts")
-  .get(userController.getUserPosts.bind(userController));
+  .get(userController.getUserPosts.bind(userController))
+  .post(postController.createPost.bind(postController));
+
+app
+  .route("/posts/:postId/comments")
+  .get(postController.getAllComments.bind(postController))
+  .post(
+    middleWare.authMiddleware,
+    postController.createComment.bind(postController)
+  );
 
 app
   .route("/users/:id/comments")
   .get(userController.getUserComments.bind(userController));
 
 app.route("/users/:id/posts/:postId/comments");
+
+app
+  .route("/posts")
+  .post(
+    middleWare.authMiddleware,
+    postController.createPost.bind(postController)
+  );
+
+app
+  .route("/posts/top")
+  .get(postController.getTopUsersWithLatestComment.bind(postController));
 
 app.listen(3000, () => {
   console.log("Server started on port 3000");

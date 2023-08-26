@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { UserRepository } from "../repository/user.repository";
-import { User } from "../model/user.model";
 
 const SECRET_KEY = "YmFzZTY0IGVuY29kZWQgc3RyaW5n";
 
@@ -10,9 +9,12 @@ export class AuthService {
 
   async validateToken(token: string) {
     return new Promise((resolve, reject) => {
+      console.log("validating token");
       jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) reject(err);
+        console.log(err);
         resolve(user);
+        console.log(user);
       });
     });
   }
